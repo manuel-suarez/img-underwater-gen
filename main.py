@@ -12,7 +12,7 @@ root_folder = "/home/est_posgrado_manuel.suarez/data"
 base_dir = "NYU_GT"
 clean_dir = "NYU_CL"
 under_dir = "NYU_underwater"
-target_dir = r"type1_data\underwater_type_1"
+target_dir = "type1_data/underwater_type_1"
 
 # Type of submarine ambient
 type_I = [0.85, 0.961, 0.982]
