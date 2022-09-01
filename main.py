@@ -1,13 +1,17 @@
 import os
 import numpy as np
 from PIL import Image
-from tqdm import tqdm
-import matplotlib.pyplot as plt
+# from tqdm import tqdm
+import logging
+# import matplotlib.pyplot as plt
 
-root_folder = r"C:\Users\masua\Downloads\Cimat\Nyu v2"
+# Ruta local
+# root_folder = r"C:\Users\masua\Downloads\Cimat\Nyu v2"
+# Ruta del clúster
+root_folder = "/home/est_posgrado_manuel.suarez/data"
 base_dir = "NYU_GT"
 clean_dir = "NYU_CL"
-under_dir = "NYU_UW"
+under_dir = "NYU_underwater"
 target_dir = r"type1_data\underwater_type_1"
 
 # Type of submarine ambient
@@ -34,7 +38,7 @@ tfiles.sort(key = lambda x: int(x.split('_')[0]))
 # print(tfiles[:10])
 
 # Traverse all files in directory
-for num_image in tqdm(range(1, 1450)):
+for num_image in range(1, 1450):
     # Conform image and depth filenames
     fname = f"{num_image}_Image_.bmp"
     dname = f"{num_image}_Depth_.bmp"
@@ -43,8 +47,8 @@ for num_image in tqdm(range(1, 1450)):
     # Open images
     image = np.array(Image.open(os.path.join(root_folder, base_dir, fname)))
     depth = np.array(Image.open(os.path.join(root_folder, base_dir, dname)))
-    # print("Image: ", image.shape, image.dtype, np.max(image), np.min(image))
-    # print("Depth: ", depth.shape, depth.dtype, np.max(depth), np.min(depth))
+    logging.info(f"Image: {image.shape}, {image.dtype}, {np.max(image)}, {np.min(image)}")
+    logging.info(f"Depth: {depth.shape}, {depth.dtype}, {np.max(depth)}, {np.min(depth)}")
     # Remove blank edges
     image0 = image[10:-10, 10:-10, :] / 255
     depth0 = depth[10:-10, 10:-10] / 255
