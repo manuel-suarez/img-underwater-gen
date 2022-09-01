@@ -6,6 +6,7 @@ root_folder = r"C:\Users\masua\Downloads\Cimat\Nyu v2"
 base_dir = "NYU_GT"
 clean_dir = "NYU_CL"
 under_dir = "NYU_UW"
+target_dir = r"type1_data\underwater_type_1"
 
 # Type of submarine ambient
 type_I = [0.85, 0.961, 0.982]
@@ -21,51 +22,67 @@ type_9 = [0.55, 0.46, 0.29]
 
 TYPE = type_1
 
+# Parámetros aleatorios de profundidad y horizonte
+# deep = 5 - 2 * np.random.rand()
+# horization = 15 - 14.5 * np.random.rand()
+
+# Obtenemos lista de archivos del directorio destino
+tfiles = os.listdir(os.path.join(root_folder, target_dir))
+tfiles.sort(key = lambda x: int(x.split('_')[0]))
+print(tfiles[:10])
+
 # Traverse all files in directory
-for num_image in range(1, 2):
+for num_image in range(1, 11):
     # Conform image and depth filenames
     fname = f"{num_image}_Image_.bmp"
     dname = f"{num_image}_Depth_.bmp"
+    tname = tfiles[num_image - 1]
+
     # Open images
     image = np.array(Image.open(os.path.join(root_folder, base_dir, fname)))
-    print("Image: ", image.shape, image.dtype, np.max(image), np.min(image))
+    # print("Image: ", image.shape, image.dtype, np.max(image), np.min(image))
     depth = np.array(Image.open(os.path.join(root_folder, base_dir, dname)))
-    print("Depth: ", depth.shape, depth.dtype, np.max(depth), np.min(depth))
+    # print("Depth: ", depth.shape, depth.dtype, np.max(depth), np.min(depth))
     # Remove blank edges
     image0 = image[10:-10, 10:-10, :] / 255
     depth0 = depth[10:-10, 10:-10] / 255
 
-    print("Image0: ", image0.shape, image0.dtype, np.max(image0), np.min(image0))
-    print("Depth0: ", depth0.shape, depth0.dtype, np.max(depth0), np.min(depth0))
-
-    # Parámetros aleatorios de profundidad y horizonte
-    deep = 5 - 2 * np.random.rand()
-    horization = 15 - 14.5 * np.random.rand()
+    # print("Image0: ", image0.shape, image0.dtype, np.max(image0), np.min(image0))
+    # print("Depth0: ", depth0.shape, depth0.dtype, np.max(depth0), np.min(depth0))
+    # Leemos los valores de los parámetros del directorio de ejemplo para verificar si
+    # obtenemos los mismos resultados
+    deep = float(tname.split('_')[2])
+    horization = float(tname.split('_')[4])
 
     # Término beta
-    A1 = 1.5 * TYPE[0]**deep
-    A2 = 1.5 * TYPE[1]**deep
-    A3 = 1.5 * TYPE[2]**deep
-    # Término t
-    t1 = TYPE[0]**(depth0 * horization)
-    t2 = TYPE[1]**(depth0 * horization)
-    t3 = TYPE[2]**(depth0 * horization)
+    #A = np.zeros(3)
+    A = 1.5 * np.array(TYPE)**deep
+    # print("A", A.shape, A.dtype)
 
-    print("T1", t1.shape, t1.dtype)
-    print("T2", t2.shape, t2.dtype)
-    print("T3", t3.shape, t3.dtype)
+    # Término t
+    t = np.zeros(image0.shape)
+    #t = np.array(TYPE)**(depth0 * horization)
+    t[:, :, 0] = TYPE[0]**(depth0 * horization)
+    t[:, :, 1] = TYPE[1]**(depth0 * horization)
+    t[:, :, 2] = TYPE[2]**(depth0 * horization)
+    # print("T", t.shape, t.dtype)
+
+    #print("T1", t1.shape, t1.dtype)
+    #print("T2", t2.shape, t2.dtype)
+    #print("T3", t3.shape, t3.dtype)
+
 
     # Underwater image
-    I = np.zeros(image0.shape)
-    print("I", I.shape, I.dtype)
-    I[:, :, 0] = image0[:, :, 0] * t1 + (1 - t1) * A1
-    I[:, :, 1] = image0[:, :, 1] * t2 + (1 - t2) * A2
-    I[:, :, 2] = image0[:, :, 2] * t3 + (1 - t3) * A3
-    print("I", I.shape, I.dtype)
+    # I = np.zeros(image0.shape)
+    # I[:, :, 0] = image0[:, :, 0] * t[:, :, 0] + (1 - t[:, :, 0]) * A[0]
+    # I[:, :, 1] = image0[:, :, 1] * t[:, :, 1] + (1 - t[:, :, 1]) * A[1]
+    # I[:, :, 2] = image0[:, :, 2] * t[:, :, 2] + (1 - t[:, :, 2]) * A[2]
+    I = A * image0 * t + (1 - t) * A
+    # print("I", I.shape, I.dtype)
 
     # Guardamos imagen
     clean_img = Image.fromarray((image0 * 255).astype(np.uint8))
     clean_img.save(os.path.join(root_folder, under_dir, fname))
-    underwater_img = Image.fromarray((I * 255).astype(np.uint8))
-    uname = f"{num_image}_Underwater_.bmp"
+    underwater_img = Image.fromarray(((I * 255) % 255).astype(np.uint8))
+    uname = f"{num_image}_Underwater_deep_{deep}_horiz_{horization}_.bmp"
     underwater_img.save(os.path.join(root_folder, under_dir, uname))
