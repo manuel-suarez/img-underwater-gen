@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 root_folder = r"C:\Users\masua\Downloads\Cimat\Nyu v2"
@@ -33,7 +34,7 @@ tfiles.sort(key = lambda x: int(x.split('_')[0]))
 # print(tfiles[:10])
 
 # Traverse all files in directory
-for num_image in range(1, 1450):
+for num_image in tqdm(range(1, 1450)):
     # Conform image and depth filenames
     fname = f"{num_image}_Image_.bmp"
     dname = f"{num_image}_Depth_.bmp"
